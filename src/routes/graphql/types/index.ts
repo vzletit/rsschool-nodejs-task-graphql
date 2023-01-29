@@ -1,5 +1,4 @@
-import { UserEntity } from "../../../utils/DB/entities/DBUsers";
-import {        
+import {              
     GraphQLID,
     GraphQLObjectType,
     GraphQLNonNull,    
@@ -15,29 +14,41 @@ import {
       id: { type: GraphQLID },
       firstName: { type: new GraphQLNonNull(GraphQLString) },
       lastName: { type: new GraphQLNonNull(GraphQLString) },
-      email: { type: new GraphQLNonNull(GraphQLString) },
+      email: { type: new GraphQLNonNull(GraphQLString) },      
+      
+      userSubscribedTo: { 
+        type: new GraphQLList(GraphQLID), 
+        resolve: async (user, _, context) => context.db.users.findMany({
+          key: 'subscribedToUserIds',
+          inArray: user.id,
+        }),
+      }, 
+      
+      subscribedToUser:  { type: new GraphQLList(GraphQLID) },
 
       memberType: {
         type: MemberType,       
-        resolve: async (user: UserEntity, _, context) => context.db.memberTypes.findOne({ key: "userId", equals: user.id })        
+        resolve: async (user, _, context) => context.db.memberTypes.findOne({ key: "userId", equals: user.id })        
       },
 
       profile: {
         type: Profile,       
-        resolve: async (user: UserEntity, _, context) => context.db.posts.findOne({ key: "userId", equals: user.id })        
+        resolve: async (user, _, context) => context.db.posts.findOne({ key: "userId", equals: user.id })        
       },
 
       posts: { 
         type: new GraphQLList(Post) ,
-        resolve: async (user: UserEntity, _, context) => context.db.posts.findMany({
+        resolve: async (user, _, context) => context.db.posts.findMany({
           key: 'userId',
           equals: user.id,
         }),
       },
 
-      subscribedToUserIds: { type: new GraphQLList(GraphQLID) },
+   
     }),
   });
+
+
 
   export const Profile = new GraphQLObjectType({
     name: "Profile",
