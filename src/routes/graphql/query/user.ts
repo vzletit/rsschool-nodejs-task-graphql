@@ -22,7 +22,7 @@ export default {
   
    users: {
     type: new GraphQLList(UserOutput),
-    resolve: async ( parent:any, arg:any, context:FastifyInstance ) => {
+    resolve: async ( _:any, __:any, context:FastifyInstance ) => {
       return await context.db.users.findMany();
     },
   },  

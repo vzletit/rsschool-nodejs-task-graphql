@@ -16,7 +16,7 @@ export default {
         resolve: async ( _:any, { id }:{ id: string }, context: FastifyInstance) => {          
             const memberType = await context.db.memberTypes.findOne({ key: "id", equals: id })
             if (!memberType) { throw context.httpErrors.badRequest('Member Type not found') }
-            return MemberTypeOutput;           
+            return memberType;           
           }
       },
 
