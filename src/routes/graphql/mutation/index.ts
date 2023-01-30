@@ -4,8 +4,8 @@ import {
 
   import user from "./user";
   import post from "./post";
-// import memberType from "./memberType";
   import profile from "./profile";
+import memberType from "./memberType";
 
 
   export default new GraphQLObjectType({
@@ -14,5 +14,6 @@ import {
    ...user,
    ...post,
    ...profile,
+   ...memberType
     }),
   });

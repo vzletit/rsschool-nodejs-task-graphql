@@ -1,17 +1,17 @@
 import { FastifyInstance } from "fastify/types/instance";
 import {    
-    GraphQLID,    
+  GraphQLString,    
     GraphQLNonNull,
     GraphQLList,      
   } from "graphql"; 
-import { Post } from '../types'
+import { PostOutput } from './OutputObjectTypes'
 
 
 export default {
     post: {            
-        type: Post,
+        type: PostOutput,
         args: {
-          id: { type: new GraphQLNonNull(GraphQLID) },
+          id: { type: new GraphQLNonNull(GraphQLString) },
         },
         resolve: async ( parent:any, { id }:{ id: string }, context: FastifyInstance) => {          
             const post = await context.db.posts.findOne({ key: "id", equals: id })
@@ -20,7 +20,7 @@ export default {
           }
       },
       posts: {
-        type: new GraphQLList(Post),        
+        type: new GraphQLList(PostOutput),        
         resolve: async ( _:any, __:any, context:FastifyInstance ) => {          
           return await context.db.posts.findMany();
         },

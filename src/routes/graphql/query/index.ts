@@ -9,7 +9,7 @@ import {
 
 
   export default new GraphQLObjectType({
-    name: "Schema",
+    name: "Query",
     fields: () => ({      
    ...user,
    ...post,

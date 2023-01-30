@@ -1,28 +1,37 @@
 import { FastifyInstance } from "fastify";
-import { GraphQLString, GraphQLNonNull, GraphQLInt, GraphQLID } from "graphql";
-import { Profile } from "../types";
+import { ProfileOutput } from "../query/OutputObjectTypes";
 import { ProfileEntity } from "../../../utils/DB/entities/DBProfiles";
+import { ProfileInput, ProfileUpdate } from "./InputObjectTypes";
 
 export default {
   createProfile: {
-    type: Profile,
-        args: {
-          userId: {type: new GraphQLNonNull(GraphQLID), description: "user Id"},
-          memberTypeId: {type: new GraphQLNonNull(GraphQLID), description: "member Type Id"},
-          
-          avatar: { type: new GraphQLNonNull(GraphQLString), description: "Avatar" },
-          sex: {type: new GraphQLNonNull(GraphQLString),description: "gender (any of today's 128 or you can invent new one)"},
-          birthday: { type: new GraphQLNonNull(GraphQLInt), description: "birth date" },
-          country: {type: new GraphQLNonNull(GraphQLString), description: "country"},
-          street: {type: new GraphQLNonNull(GraphQLString), description: "street"},
-          city: {type: new GraphQLNonNull(GraphQLString), description: "city"},
-      
-    },
-    resolve: async (_: any, args: ProfileEntity, context: FastifyInstance) => {     
-    const user = await context.db.users.findOne({key: 'id', equals: args.userId})
-    
+    type: ProfileOutput,
+    args: { payload: { type: ProfileInput } },    
+    resolve: async (_ = {}, { payload }: {payload: ProfileEntity }, context: FastifyInstance) => {
+    const user = await context.db.users.findOne({key: 'id', equals: payload.userId})
     if (!user) { throw context.httpErrors.badRequest("User not found.") }          
-    return await context.db.profiles.create(args)
+    
+    const memberType = await context.db.memberTypes.findOne({key: 'id', equals: payload.memberTypeId})
+    if (!memberType) { throw context.httpErrors.badRequest("Member type not found.") }          
+    
+    const profile = await context.db.profiles.findOne({key: 'userId', equals: payload.userId})
+    if (profile) { throw context.httpErrors.badRequest("User already has profile.") }          
+    
+    return await context.db.profiles.create(payload)
     }
-  }  
+  },
+  
+  updateProfile: {
+    type: ProfileOutput,
+    args: { payload: { type: ProfileUpdate } },        
+    resolve: async (_ = {}, { payload }: {payload: ProfileEntity }, context: FastifyInstance) => {
+      const profile = await context.db.profiles.findOne({ key: "id", equals: payload.id});
+      if (!profile) { throw context.httpErrors.badRequest("Profile not found") }
+      
+      const updatedProfile = {...profile, ...payload}
+      return await context.db.profiles.change(profile.id, updatedProfile);
+    },
+  },
+
+
 };

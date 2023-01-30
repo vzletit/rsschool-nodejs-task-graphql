@@ -1,27 +1,27 @@
 import { FastifyInstance } from "fastify";
 import {    
-    GraphQLID,    
+    GraphQLString,    
     GraphQLNonNull,
     GraphQLList,      
   } from "graphql"; 
-import { MemberType } from '../types'
+import { MemberTypeOutput } from './OutputObjectTypes'
 
 
 export default {
     memberType: {
-        type: MemberType,
+        type: MemberTypeOutput,
         args: {
-          id: { type: new GraphQLNonNull(GraphQLID) },
+          id: { type: new GraphQLNonNull(GraphQLString) },
         },
-        resolve: async ( parent:any, { id }:{ id: string }, context: FastifyInstance) => {          
+        resolve: async ( _:any, { id }:{ id: string }, context: FastifyInstance) => {          
             const memberType = await context.db.memberTypes.findOne({ key: "id", equals: id })
             if (!memberType) { throw context.httpErrors.badRequest('Member Type not found') }
-            return MemberType;           
+            return MemberTypeOutput;           
           }
       },
 
       memberTypes: {
-        type: new GraphQLList(MemberType),         
+        type: new GraphQLList(MemberTypeOutput),         
         resolve: async ( _:any, __:any, context:FastifyInstance ) => {
           return await context.db.memberTypes.findMany()
         }
