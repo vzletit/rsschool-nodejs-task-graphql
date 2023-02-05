@@ -249,11 +249,10 @@ Variables (insert the appropriate data. Any user field(s) can be updated):
 { 
     "payload": {
     "id": "USER_ID", 
-    "lastName": "Mynewlastname"}
-}   
-
-}   
-   ```
+    "lastName": "Mynewlastname"
+    }
+}
+```
 
 **Update profile.**
 ```Bash
@@ -268,9 +267,10 @@ Variables (insert the appropriate data. Any profile field(s) can be updated):
 { 
     "payload": {
     "id": "PROFILE_ID", 
-    "avatar": "SlowPoke"}
-    }   
+    "avatar": "SlowPoke"
+      }
 }   
+
    ```
 **Update post.**
 ```Bash
@@ -279,7 +279,7 @@ mutation ( $payload: PostUpdateDTO )
     updatePost (payload: $payload) {
         id
         }
-    }
+}
 ```
 Variables (insert the appropriate data. Any post field(s) can be updated):
 ```bash
