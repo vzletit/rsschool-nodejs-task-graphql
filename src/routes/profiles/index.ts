@@ -8,7 +8,10 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
 ): Promise<void> => {
   fastify.get('/', async function (request, reply): Promise<
     ProfileEntity[]
-  > {});
+  > {
+    return await fastify.db.profiles.findMany();
+    
+  });
 
   fastify.get(
     '/:id',
@@ -17,7 +20,16 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+
+        const profile = await fastify.db.profiles.findOne({ 
+            key: 'id', 
+            equals: request.params.id 
+        });
+        
+        if (!profile) { throw fastify.httpErrors.notFound('Profile not found') }
+        return profile;
+    }
   );
 
   fastify.post(
@@ -27,7 +39,13 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createProfileBodySchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+        const existingProfile = await fastify.db.profiles.findOne({key: 'userId', equals: request.body.userId});
+        const memberType = await fastify.db.memberTypes.findOne({key: 'id', equals: request.body.memberTypeId});
+        if (existingProfile) { throw fastify.httpErrors.badRequest('Profile already exists'); }
+        if (!memberType) { throw fastify.httpErrors.badRequest('Member type not exists'); }
+        return await fastify.db.profiles.create(request.body) 
+    }    
   );
 
   fastify.delete(
@@ -37,7 +55,11 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+        const userProfile = await fastify.db.profiles.findOne({key: 'id', equals: request.params.id});
+        if (!userProfile) { throw fastify.httpErrors.badRequest('Profile not found') }
+        return await fastify.db.profiles.delete(request.params.id)
+    }
   );
 
   fastify.patch(
@@ -48,7 +70,12 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+
+        const profile = await fastify.db.profiles.findOne({key: 'id', equals: request.params.id});
+        if (!profile) { throw fastify.httpErrors.badRequest('Profile not found') }
+        return await fastify.db.profiles.change(request.params.id, request.body)
+    }
   );
 };
 
